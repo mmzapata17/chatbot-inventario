@@ -88,142 +88,167 @@
 
   <script>
 
-    const boton =
-      document.getElementById("hablar");
+  const URL_APPS_SCRIPT = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
 
-    const resultado =
-      document.getElementById("resultado");
+  const boton = document.getElementById("hablar");
+  const resultado = document.getElementById("resultado");
 
-
-    // ==========================================
-    // RECONOCIMIENTO DE VOZ
-    // ==========================================
-
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
 
-    // ==========================================
-    // COMPROBAR COMPATIBILIDAD
-    // ==========================================
+  // ==========================================
+  // COMPROBAR RECONOCIMIENTO DE VOZ
+  // ==========================================
 
-    if (!SpeechRecognition) {
+  if (!SpeechRecognition) {
+
+    resultado.innerText =
+      "❌ Tu navegador no permite reconocimiento de voz.";
+
+    boton.disabled = true;
+
+  } else {
+
+    const reconocimiento =
+      new SpeechRecognition();
+
+    reconocimiento.lang = "es-CO";
+    reconocimiento.continuous = false;
+    reconocimiento.interimResults = false;
+    reconocimiento.maxAlternatives = 1;
+
+
+    // ========================================
+    // BOTÓN HABLAR
+    // ========================================
+
+    boton.addEventListener("click", function() {
 
       resultado.innerText =
-        "❌ Tu navegador no permite reconocimiento de voz.";
+        "🎙️ Escuchando...\n\nHabla ahora.";
 
       boton.disabled = true;
 
-    } else {
+      try {
 
-      const reconocimiento =
-        new SpeechRecognition();
+        reconocimiento.start();
 
+      } catch (error) {
 
-      reconocimiento.lang =
-        "es-CO";
+        console.log(error);
 
+      }
 
-      reconocimiento.continuous =
-        false;
-
-
-      reconocimiento.interimResults =
-        false;
+    });
 
 
-      reconocimiento.maxAlternatives =
-        1;
+    // ========================================
+    // RESULTADO DE VOZ
+    // ========================================
+
+    reconocimiento.addEventListener(
+      "result",
+      async function(event) {
+
+        const texto =
+          event.results[0][0].transcript;
+
+        resultado.innerText =
+          "🗣️ Pregunta:\n\n" +
+          texto +
+          "\n\n⏳ Consultando inventario...";
 
 
-      // ========================================
-      // BOTÓN HABLAR
-      // ========================================
+        try {
 
-      boton.addEventListener(
-        "click",
-        function() {
+          const respuesta =
+            await fetch(
+              URL_APPS_SCRIPT,
+              {
+                method: "POST",
 
-          resultado.innerText =
-            "🎙️ Escuchando...\n\nHabla ahora.";
+                headers: {
+                  "Content-Type": "application/json"
+                },
 
-          boton.disabled = true;
+                body: JSON.stringify({
+                  pregunta: texto
+                })
+              }
+            );
 
-          try {
 
-            reconocimiento.start();
+          const datos =
+            await respuesta.json();
 
-          } catch (error) {
 
-            console.log(error);
+          if (datos.error) {
+
+            throw new Error(datos.error);
 
           }
 
-        }
-      );
-
-
-      // ========================================
-      // RESULTADO
-      // ========================================
-
-      reconocimiento.addEventListener(
-        "result",
-        function(event) {
-
-          const texto =
-            event.results[0][0].transcript;
-
 
           resultado.innerText =
-            "✅ Te entendí:\n\n" +
-            texto;
+            "🗣️ Pregunta:\n\n" +
+            texto +
+            "\n\n💬 Respuesta:\n\n" +
+            datos.respuesta;
 
-        }
-      );
 
+        } catch (error) {
 
-      // ========================================
-      // ERROR
-      // ========================================
-
-      reconocimiento.addEventListener(
-        "error",
-        function(event) {
+          console.error(error);
 
           resultado.innerText =
-            "❌ Error de reconocimiento:\n\n" +
-            event.error;
-
-          console.log(
-            "Error:",
-            event.error
-          );
-
-          boton.disabled = false;
+            "❌ No se pudo conectar con el chatbot.\n\n" +
+            error.message;
 
         }
-      );
 
 
-      // ========================================
-      // FINALIZAR
-      // ========================================
+        boton.disabled = false;
 
-      reconocimiento.addEventListener(
-        "end",
-        function() {
+      }
+    );
 
-          boton.disabled = false;
 
-        }
-      );
+    // ========================================
+    // ERROR
+    // ========================================
 
-    }
+    reconocimiento.addEventListener(
+      "error",
+      function(event) {
 
-  </script>
+        resultado.innerText =
+          "❌ Error de reconocimiento:\n\n" +
+          event.error;
 
+        boton.disabled = false;
+
+      }
+    );
+
+
+    // ========================================
+    // FINALIZAR
+    // ========================================
+
+    reconocimiento.addEventListener(
+      "end",
+      function() {
+
+        boton.disabled = false;
+
+      }
+    );
+
+  }
+
+</script>
 </body>
 
 </html>

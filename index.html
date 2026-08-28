@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Asistente de inventario</title>
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .contenedor {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #666;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #34a853;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    #resultado {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f1f1f1;
+      border-radius: 10px;
+      min-height: 50px;
+      white-space: pre-line;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <div class="contenedor">
+
+    <h1>🤖 Asistente de inventario</h1>
+
+    <p>
+      Pulsa el botón y haz una pregunta.
+    </p>
+
+    <button id="hablar">
+      🎤 Hablar
+    </button>
+
+    <div id="resultado">
+      Esperando...
+    </div>
+
+  </div>
+
+
+  <script>
+
+    const boton =
+      document.getElementById("hablar");
+
+    const resultado =
+      document.getElementById("resultado");
+
+
+    // ==========================================
+    // RECONOCIMIENTO DE VOZ
+    // ==========================================
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+
+    // ==========================================
+    // COMPROBAR COMPATIBILIDAD
+    // ==========================================
+
+    if (!SpeechRecognition) {
+
+      resultado.innerText =
+        "❌ Tu navegador no permite reconocimiento de voz.";
+
+      boton.disabled = true;
+
+    } else {
+
+      const reconocimiento =
+        new SpeechRecognition();
+
+
+      reconocimiento.lang =
+        "es-CO";
+
+
+      reconocimiento.continuous =
+        false;
+
+
+      reconocimiento.interimResults =
+        false;
+
+
+      reconocimiento.maxAlternatives =
+        1;
+
+
+      // ========================================
+      // BOTÓN HABLAR
+      // ========================================
+
+      boton.addEventListener(
+        "click",
+        function() {
+
+          resultado.innerText =
+            "🎙️ Escuchando...\n\nHabla ahora.";
+
+          boton.disabled = true;
+
+          try {
+
+            reconocimiento.start();
+
+          } catch (error) {
+
+            console.log(error);
+
+          }
+
+        }
+      );
+
+
+      // ========================================
+      // RESULTADO
+      // ========================================
+
+      reconocimiento.addEventListener(
+        "result",
+        function(event) {
+
+          const texto =
+            event.results[0][0].transcript;
+
+
+          resultado.innerText =
+            "✅ Te entendí:\n\n" +
+            texto;
+
+        }
+      );
+
+
+      // ========================================
+      // ERROR
+      // ========================================
+
+      reconocimiento.addEventListener(
+        "error",
+        function(event) {
+
+          resultado.innerText =
+            "❌ Error de reconocimiento:\n\n" +
+            event.error;
+
+          console.log(
+            "Error:",
+            event.error
+          );
+
+          boton.disabled = false;
+
+        }
+      );
+
+
+      // ========================================
+      // FINALIZAR
+      // ========================================
+
+      reconocimiento.addEventListener(
+        "end",
+        function() {
+
+          boton.disabled = false;
+
+        }
+      );
+
+    }
+
+  </script>
+
+</body>
+
+</html>

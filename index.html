@@ -163,25 +163,8 @@
 
         try {
 
-          const respuesta =
-            await fetch(
-              URL_APPS_SCRIPT,
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                  pregunta: texto
-                })
-              }
-            );
-
-
-          const datos =
-            await respuesta.json();
+const datos =
+  await consultarChatbot(texto);
 
 
           if (datos.error) {
@@ -214,6 +197,75 @@
       }
     );
 
+    async function consultarChatbot(pregunta) {
+
+  return new Promise(function(resolve, reject) {
+
+    const nombreCallback =
+      "respuestaChatbot_" +
+      Date.now();
+
+    window[nombreCallback] =
+      function(datos) {
+
+        delete window[nombreCallback];
+
+        resolve(datos);
+
+      };
+
+
+    const script =
+      document.createElement("script");
+
+
+    const url =
+      URL_APPS_SCRIPT +
+      "?pregunta=" +
+      encodeURIComponent(pregunta) +
+      "&callback=" +
+      nombreCallback;
+
+
+    script.src = url;
+
+
+    script.onerror =
+      function() {
+
+        delete window[nombreCallback];
+
+        reject(
+          new Error(
+            "No se pudo conectar con Apps Script."
+          )
+        );
+
+      };
+
+
+    document.body.appendChild(script);
+
+
+    setTimeout(function() {
+
+      if (window[nombreCallback]) {
+
+        delete window[nombreCallback];
+
+        reject(
+          new Error(
+            "Apps Script tardó demasiado en responder."
+          )
+        );
+
+      }
+
+    }, 30000);
+
+  });
+
+}
 
     // ========================================
     // ERROR

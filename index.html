@@ -181,20 +181,17 @@ const datos =
   datos.respuesta;
 
 // 🔊 Leer la respuesta en voz alta
-// 🔊 Preparar respuesta para voz
+
 let textoVoz = datos.respuesta;
 
 // 🔇 Eliminar asteriscos para la voz
 textoVoz = textoVoz.replace(/\*/g, "");
 
+// 💰 Convertir precios a palabras
+textoVoz = convertirPreciosAVoz(textoVoz);
+
 console.log("RESPUESTA ORIGINAL:", datos.respuesta);
-
-textoVoz = convertirPreciosAVoz(textoVoz);
-
 console.log("RESPUESTA PARA VOZ:", textoVoz);
-          
-// Convertir precios como $45.000 a palabras
-textoVoz = convertirPreciosAVoz(textoVoz);
 
 const voz =
   new SpeechSynthesisUtterance(textoVoz);
@@ -205,7 +202,7 @@ voz.pitch = 1;
 
 speechSynthesis.cancel();
 speechSynthesis.speak(voz);
-          console.log("🔊 Intentando hablar:", datos.respuesta);
+console.log("🔊 Intentando hablar:", datos.respuesta);
 
 
         } catch (error) {

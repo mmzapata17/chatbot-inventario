@@ -190,10 +190,6 @@ textoVoz = textoVoz.replace(/[*_#`~]/g, "");
 // 💰 Convertir precios a palabras
 textoVoz = convertirPreciosAVoz(textoVoz);
 
-console.log("RESPUESTA ORIGINAL:", datos.respuesta);
-console.log("RESPUESTA PARA VOZ:", textoVoz);
-alert("VOZ: " + textoVoz);
-
 const voz =
   new SpeechSynthesisUtterance(textoVoz);
 

@@ -185,7 +185,7 @@ const datos =
 let textoVoz = datos.respuesta;
 
 // 🔇 Eliminar asteriscos para la voz
-textoVoz = textoVoz.replace(/\*/g, "");
+textoVoz = textoVoz.replace(/[*_#`~]/g, "");
 
 // 💰 Convertir precios a palabras
 textoVoz = convertirPreciosAVoz(textoVoz);

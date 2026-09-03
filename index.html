@@ -184,6 +184,15 @@ const datos =
 // 🔊 Preparar respuesta para voz
 let textoVoz = datos.respuesta;
 
+// 🔇 Eliminar asteriscos para la voz
+textoVoz = textoVoz.replace(/\*/g, "");
+
+console.log("RESPUESTA ORIGINAL:", datos.respuesta);
+
+textoVoz = convertirPreciosAVoz(textoVoz);
+
+console.log("RESPUESTA PARA VOZ:", textoVoz);
+          
 // Convertir precios como $45.000 a palabras
 textoVoz = convertirPreciosAVoz(textoVoz);
 

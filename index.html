@@ -181,10 +181,17 @@ const datos =
   datos.respuesta;
 
 // 🔊 Leer la respuesta en voz alta
-const voz = new SpeechSynthesisUtterance(datos.respuesta);
+// 🔊 Preparar respuesta para voz
+let textoVoz = datos.respuesta;
+
+// Convertir precios como $45.000 a palabras
+textoVoz = convertirPreciosAVoz(textoVoz);
+
+const voz =
+  new SpeechSynthesisUtterance(textoVoz);
 
 voz.lang = "es-CO";
-voz.rate = 1;
+voz.rate = 0.95;
 voz.pitch = 1;
 
 speechSynthesis.cancel();
@@ -310,6 +317,179 @@ speechSynthesis.speak(voz);
     );
 
   }
+
+    // ==========================================
+// 💰 CONVERTIR PRECIOS A VOZ
+// ==========================================
+
+function convertirPreciosAVoz(texto) {
+
+  return texto.replace(
+    /\$+\s*([\d.]+)/g,
+    function(_, numero) {
+
+      const valor =
+        parseInt(numero.replace(/\./g, ""), 10);
+
+      if (isNaN(valor)) {
+        return numero;
+      }
+
+      return numeroATexto(valor) + " pesos";
+    }
+  );
+
+}
+
+
+// ==========================================
+// 🔢 CONVERTIR NÚMEROS A PALABRAS
+// ==========================================
+
+function numeroATexto(numero) {
+
+  if (numero === 0) {
+    return "cero";
+  }
+
+  if (numero < 1000) {
+    return unidades(numero);
+  }
+
+  if (numero < 1000000) {
+
+    const miles =
+      Math.floor(numero / 1000);
+
+    const resto =
+      numero % 1000;
+
+    let resultado;
+
+    if (miles === 1) {
+      resultado = "mil";
+    } else {
+      resultado =
+        numeroATexto(miles) + " mil";
+    }
+
+    if (resto > 0) {
+      resultado +=
+        " " + numeroATexto(resto);
+    }
+
+    return resultado;
+  }
+
+  return numero.toLocaleString("es-CO");
+}
+
+
+// ==========================================
+// 🔤 NÚMEROS DEL 1 AL 999
+// ==========================================
+
+function unidades(numero) {
+
+  const numeros = [
+    "",
+    "uno",
+    "dos",
+    "tres",
+    "cuatro",
+    "cinco",
+    "seis",
+    "siete",
+    "ocho",
+    "nueve",
+    "diez",
+    "once",
+    "doce",
+    "trece",
+    "catorce",
+    "quince",
+    "dieciséis",
+    "diecisiete",
+    "dieciocho",
+    "diecinueve",
+    "veinte"
+  ];
+
+  if (numero <= 20) {
+    return numeros[numero];
+  }
+
+  if (numero < 30) {
+
+    return "veinti" +
+      numeros[numero - 20];
+  }
+
+  const decenas = [
+    "",
+    "",
+    "veinte",
+    "treinta",
+    "cuarenta",
+    "cincuenta",
+    "sesenta",
+    "setenta",
+    "ochenta",
+    "noventa"
+  ];
+
+  if (numero < 100) {
+
+    const decena =
+      Math.floor(numero / 10);
+
+    const unidad =
+      numero % 10;
+
+    if (unidad === 0) {
+      return decenas[decena];
+    }
+
+    return (
+      decenas[decena] +
+      " y " +
+      numeros[unidad]
+    );
+  }
+
+  const centenas = [
+    "",
+    "ciento",
+    "doscientos",
+    "trescientos",
+    "cuatrocientos",
+    "quinientos",
+    "seiscientos",
+    "setecientos",
+    "ochocientos",
+    "novecientos"
+  ];
+
+  if (numero === 100) {
+    return "cien";
+  }
+
+  const centena =
+    Math.floor(numero / 100);
+
+  const resto =
+    numero % 100;
+
+  if (resto === 0) {
+    return centenas[centena];
+  }
+
+  return (
+    centenas[centena] +
+    " " +
+    unidades(resto)
+  );
+}
 
 </script>
 </body>
